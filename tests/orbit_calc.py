@@ -22,9 +22,9 @@ def T_circular(x):
     v = v_circular(x[0:3])
     return 2 * math.pi * r / v
 
-def T_owbow(x):
-    r = np.linalg.norm(x[0:3])
-    return 7 * math.pi * np.sqrt(r**3 / GM)
+def T_owbow(x1, x2):
+    r = (np.linalg.norm(x1[0:3]) + np.linalg.norm(x2[0:3])) / 2
+    return 2 * math.pi * np.sqrt(r**3 / GM)
 
 # 2インパルスホーマン移行を計算する関数
 def hohmann(x1, x2):

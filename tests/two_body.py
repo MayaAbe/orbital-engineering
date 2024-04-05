@@ -26,7 +26,7 @@ def draw_hohman_orbit(x1, x2, tr):
     t2 = np.linspace(0, oc.T_circular(x2), 1000) # 1日分 軌道伝播
     sol2 = odeint(func, x2, t2)
 
-    ttr = np.linspace(0, oc.T_owbow(tr), 1000)
+    ttr = np.linspace(0, oc.T_owbow(x1, x2)/2 , 1000)
     soltr = odeint(func, tr, ttr)
 
     # 描画
