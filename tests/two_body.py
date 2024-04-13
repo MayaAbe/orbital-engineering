@@ -37,14 +37,51 @@ def draw_hohman_orbit(x1, x2, tr):
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
     plt.show()
+"""
+def trim_solution(sol, r2):
+    # Iterate over the solution to find the index where the norm exceeds 'r2'
+    for i, x1 in enumerate(sol):
+        if np.linalg.norm(x1[:3]) > r2:
+            new_sol = sol[:i]
+            norm_prev = np.linalg.norm(new_sol[-1][:3])
+            norm_curr = np.linalg.norm(sol[i][:3])
+            # 線形補間して半径がr2になるようにする
+            t = (r2 - np.linalg.norm(new_sol[-1][:3])) / (np.linalg.norm(sol[i][:3]) - np.linalg.norm(new_sol[-1][:3]))
+            # Interpolate linearly between the two points
+            new_point = new_sol[-1] + t * (sol[i] - new_sol[-1])
+            # new_point *= r2 / np.linalg.norm(new_point[:3])
+            print(np.linalg.norm(new_point[:3]))
+            # Return the modified solution with the new interpolated point as the last point
+            return np.concatenate((new_sol, [new_point]))
+    # Return the original solution if no elements exceed 'r2'
+    return sol"""
 
 def trim_solution(sol, r2):
     # Iterate over the solution to find the index where the norm exceeds 'r2'
     for i, x1 in enumerate(sol):
         if np.linalg.norm(x1[:3]) > r2:
-            return sol[:i]
+            new_sol = sol[:i]
+            # 倍率をt(0~1)とし，以下の変数new_pointについて二分探索でr2==np.linalg.norm(new_point[:3])になるようにする
+            # new_point = new_sol[-1] + t * (sol[i] - new_sol[-1])
+            # このtを求める
+            # 二分探索の初期値
+            left = 0
+            right = 1
+            # 二分探索
+            while right - left > np.finfo(np.float64).eps:
+                t = (left + right) / 2
+                new_point = new_sol[-1] + t * (sol[i] - new_sol[-1])
+                if np.linalg.norm(new_point[:3]) > r2:
+                    right = t
+                else:
+                    left = t
+            new_point = new_sol[-1] + right * (sol[i] - new_sol[-1])
+            print(np.linalg.norm(new_point[:3]))
+            # Return the modified solution with the new interpolated point as the last point
+            return np.concatenate((new_sol, [new_point]))
     # Return the original solution if no elements exceed 'r2'
     return sol
+
 
 def draw_hohman_orbit2(x1, r2, dv1):
     # 与えられた円軌道を軌道伝播
@@ -88,15 +125,15 @@ def draw_hohman_orbit2(x1, r2, dv1):
     # 遷移軌道末項位置における円軌道の速度ベクトル-楕円軌道の速度ベクトル
     dv2 =(tr_x2[3:6] -soltr[-1][3:6]).tolist()
 
-    '''
+    """
     # 描画
     plt.plot(soltr_combined[:, 0], soltr_combined[:, 1], 'k')
     plt.plot(sol1[:, 0], sol1[:, 1], 'b')
     plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
-    plt.show()
-    '''
+    plt.show()"""
+
 
     return dv1, dv2, soltr_combined, sol1, sol2
 
