@@ -22,21 +22,22 @@ def T_circular(x):
     v = v_circular(x[0:3])
     return 2 * math.pi * r / v
 
-def T_owbow(x1, x2):
-    r = (np.linalg.norm(x1[0:3]) + np.linalg.norm(x2[0:3])) / 2
-    return 2 * math.pi * np.sqrt(r**3 / GM)
 
-# 2インパルスホーマン移行を計算する関数
-def hohmann(x1, x2):
-    r1=np.linalg.norm(x1[0:3])
-    r2=np.linalg.norm(x2[0:3])
-    a = (r1 + r2) / 2
-    v1 = np.sqrt(GM / r1)
-    v2 = np.sqrt(GM / r2)
-    v = np.sqrt(GM / a)
-    dv1 = v - v1
-    dv2 = v2 - v
-    return dv1, dv2
+def T_owbow(x):
+    # 軌道半径と軌道エネルギーから半長軸を求める
+    r_norm = np.linalg.norm(x[0:3])
+    ep = np.dot(x[3:6], x[3:6]) / 2 - GM / r_norm
+    a = -GM / (2 * ep)
+    # 半長軸を求めたら軌道周期T=2π√a3/GMで周期を求める
+    if a <= 0:
+        return np.inf
+    else:
+        return 2 * math.pi * np.sqrt(a**3/GM)
+
+# 平面2体問題2インパルスホーマン移行に限ったときのみ使用可能
+def T_owbow2(r1, r2):
+    r = (r1 + r2) / 2 # 楕円の半長軸を求める
+    return 2 * math.pi * np.sqrt(r**3 / GM)
 
 # 2インパルスホーマン移行において，遷移開始高度と軌道半径の差分をインプットとしたとき，終端位置の座標を返す関数
 def hohmann_pos(r1, dr):
