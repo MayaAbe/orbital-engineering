@@ -8,4 +8,4 @@ x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 dv1 = [0, 2.5 ,0]
 
 # print(oc.T_owbow(x1))
-print(tb.draw_hohman_orbit2(x1, R + 35786, dv1))
+tb.draw_hohman_orbit2(x1, R + 35786, dv1)

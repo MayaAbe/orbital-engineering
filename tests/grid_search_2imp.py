@@ -10,9 +10,9 @@ x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 
 def grid_search(
     x1, R,
-    dv1_x=(0, 1),
-    dv1_y=(2, 3),
-    increments=(0.01, 0.01)
+    dv1_x=(-0.1, 0.1),
+    dv1_y=(2.2, 2.5),
+    increments=(0.1, 0.1)
 ):
     min_dv = float('inf')
     best_params = None
@@ -29,7 +29,6 @@ def grid_search(
         for dv1_y_value in np.arange(dv1_y[0], dv1_y[1]+increments[1], increments[1]):
 
             dv1 = [dv1_x_value, dv1_y_value, 0]
-            initial_params = [dv1_x_value, dv1_y_value, 0]
 
             # dv1を
             dv1_ans, dv2_ans, sol_com, sol1, sol2 = tb.draw_hohman_orbit2(x1, R + 35786, dv1)
@@ -43,7 +42,9 @@ def grid_search(
                 if dv < min_dv:
                     min_dv = dv
                     best_params = [dv1_ans, dv2_ans, sol_com, sol1, sol2]
-                    best_initials = initial_params
+                    best_initials = [dv1_x_value, dv1_y_value, 0]
+            #else :
+                #np.linalg.norm(sol_com[-1][0:3])
 
             current_iteration += 1
             print(f'Iteration {current_iteration}/{total_iterations}')
@@ -73,4 +74,3 @@ plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
 plt.grid()  # 格子をつける
 plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
 plt.show()
-

@@ -43,8 +43,6 @@ def trim_solution(sol, r2):
     for i, x1 in enumerate(sol):
         if np.linalg.norm(x1[:3]) > r2:
             new_sol = sol[:i]
-            norm_prev = np.linalg.norm(new_sol[-1][:3])
-            norm_curr = np.linalg.norm(sol[i][:3])
             # 線形補間して半径がr2になるようにする
             t = (r2 - np.linalg.norm(new_sol[-1][:3])) / (np.linalg.norm(sol[i][:3]) - np.linalg.norm(new_sol[-1][:3]))
             # Interpolate linearly between the two points
@@ -88,7 +86,8 @@ def draw_hohman_orbit2(x1, r2, dv1):
     t1 = np.linspace(0, oc.T_circular(x1), 1000)
     sol1 = odeint(func, x1, t1)
     # 目標軌道を書く
-    x2 = [r_E+36000, 0, 0, 0, 3.0668882673431845, 0]
+    x2 = [r_E+35786, 0, 0]
+    x2 = [r_E+35786, 0, 0, 0, oc.v_circular(x2), 0]
     t2  = np.linspace(0, oc.T_circular(x2), 1000) # 1日分 軌道伝播
     sol2 = odeint(func, x2, t2)
 
@@ -125,8 +124,8 @@ def draw_hohman_orbit2(x1, r2, dv1):
     # 遷移軌道末項位置における円軌道の速度ベクトル-楕円軌道の速度ベクトル
     dv2 =(tr_x2[3:6] -soltr[-1][3:6]).tolist()
 
-    """
-    # 描画
+
+    """# 描画
     plt.plot(soltr_combined[:, 0], soltr_combined[:, 1], 'k')
     plt.plot(sol1[:, 0], sol1[:, 1], 'b')
     plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
