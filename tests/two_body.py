@@ -148,6 +148,36 @@ def ap_kick(r1, r2, dv1):
         sol.append(xt)
     return sol
 
+
+def runge_kutta_odeint(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
+    y0 = np.array(y0, dtype=float)
+    y = np.zeros((len(t), len(y0)), dtype=float)
+    y[0] = y0
+    output = {'message': 'Integration successful.'}
+
+    for i in range(1, len(t)):
+        dt = t[i] - t[i - 1]
+        if hmax != 0.0 and dt > hmax:
+            dt = hmax
+
+        k1 = np.array(func(y[i - 1], t[i - 1], *args))
+        k2 = np.array(func(y[i - 1] + 0.5 * dt * k1, t[i - 1] + 0.5 * dt, *args))
+        k3 = np.array(func(y[i - 1] + 0.5 * dt * k2, t[i - 1] + 0.5 * dt, *args))
+        k4 = np.array(func(y[i - 1] + dt * k3, t[i - 1] + dt, *args))
+
+        y[i] = y[i - 1] + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+        # Error check based on tolerance settings
+        error_estimate = np.max(np.abs(dt / 6 * (k1 + 2*k2 + 2*k3 + k4)))
+        if error_estimate > atol + rtol * np.max(np.abs(y[i])):
+            output['message'] = 'Integration step failed due to error tolerance.'
+
+    if full_output:
+        return y, output
+    else:
+        return y
+
+
 if __name__ == '__main__':
     # 地球の輪郭
     # x_E = [r_E, 0, 0, 0, 7.9, 0] # 位置(x,y,z)＋速度(vx,vy,vz)
@@ -155,14 +185,14 @@ if __name__ == '__main__':
     # solE = odeint(func, x_E, t_E)
 
     # 微分方程式の初期条件
-    x0 = [r_E+1000, 0, 0] # 位置(x,y,z)
-    x0 = [r_E+1000, 0, 0, 0, oc.v_circular(x0), 0] # 位置(x,y,z)＋速度(vx,vy,vz)
-    t0  = np.linspace(0, oc.T_circular(x0), 1000) # 1日分 軌道伝播
-    sol0 = odeint(func, x0, t0)
-    print (sol0)
+    x0 = [r_E+1000, 0, 0]  # 位置(x,y,z)
+    x0 = [r_E+1000, 0, 0, 0, oc.v_circular(x0), 0]  # 位置(x,y,z)＋速度(vx,vy,vz)
+    t0 = np.linspace(0, 10000*oc.T_circular(x0), 10000000)  # 1日分 軌道伝播
+    sol0 = runge_kutta_odeint(func, x0, t0)
+    print(sol0)
     # 描画
     # plt.plot(solE[:, 0],solE[:, 1],'k')
     plt.plot(sol0[:, 0],sol0[:, 1], 'b')
-    plt.grid() # 格子をつける
-    plt.gca().set_aspect('equal') # グラフのアスペクト比を揃える
+    plt.grid()  # 格子をつける
+    plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
     plt.show()
