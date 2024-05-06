@@ -193,7 +193,9 @@ if __name__ == '__main__':
     print(sol0)
     # 描画
     # plt.plot(solE[:, 0],solE[:, 1],'k')
-    plt.plot(sol0[:, 0],sol0[:, 1], 'b')
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot(sol0[:, 0], sol0[:, 1], sol0[:, 2], 'b')
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
     plt.show()
