@@ -54,10 +54,10 @@ def trim_solution(sol, r2):
     # Return the original solution if no elements exceed 'r2'
     return sol"""
 
-def trim_solution(sol, r2):
+def trim_solution(sol, r_aim):
     # Iterate over the solution to find the index where the norm exceeds 'r2'
     for i, x1 in enumerate(sol):
-        if np.linalg.norm(x1[:3]) > r2:
+        if np.linalg.norm(x1[:3]) > r_aim:
             new_sol = sol[:i]
             # 倍率をt(0~1)とし，以下の変数new_pointについて二分探索でr2==np.linalg.norm(new_point[:3])になるようにする
             # new_point = new_sol[-1] + t * (sol[i] - new_sol[-1])
@@ -69,7 +69,7 @@ def trim_solution(sol, r2):
             while right - left > np.finfo(np.float64).eps:
                 t = (left + right) / 2
                 new_point = new_sol[-1] + t * (sol[i] - new_sol[-1])
-                if np.linalg.norm(new_point[:3]) > r2:
+                if np.linalg.norm(new_point[:3]) > r_aim:
                     right = t
                 else:
                     left = t
@@ -81,6 +81,7 @@ def trim_solution(sol, r2):
     return sol
 
 
+
 def draw_hohman_orbit2(x1, r2, dv1):
     # 与えられた円軌道を軌道伝播
     t1 = np.linspace(0, oc.T_circular(x1), 1000)
@@ -88,7 +89,7 @@ def draw_hohman_orbit2(x1, r2, dv1):
     # 目標軌道を書く
     x2 = [r_E+35786, 0, 0]
     x2 = [r_E+35786, 0, 0, 0, oc.v_circular(x2), 0]
-    t2  = np.linspace(0, oc.T_circular(x2), 1000) # 1日分 軌道伝播
+    t2  = np.linspace(0, oc.T_circular(x2), 1000)  # 1日分 軌道伝播
     sol2 = odeint(func, x2, t2)
 
     tr = x1.copy()
@@ -125,13 +126,13 @@ def draw_hohman_orbit2(x1, r2, dv1):
     dv2 =(tr_x2[3:6] -soltr[-1][3:6]).tolist()
 
 
-    """# 描画
+    # 描画
     plt.plot(soltr_combined[:, 0], soltr_combined[:, 1], 'k')
     plt.plot(sol1[:, 0], sol1[:, 1], 'b')
     plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
-    plt.show()"""
+    plt.show()
 
 
     return dv1, dv2, soltr_combined, sol1, sol2
@@ -149,7 +150,7 @@ def ap_kick(r1, r2, dv1):
     return sol
 
 
-def runge_kutta_odeint(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
+def rk4(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
     y0 = np.array(y0, dtype=float)
     y = np.zeros((len(t), len(y0)), dtype=float)
     y[0] = y0
@@ -187,8 +188,8 @@ if __name__ == '__main__':
     # 微分方程式の初期条件
     x0 = [r_E+1000, 0, 0]  # 位置(x,y,z)
     x0 = [r_E+1000, 0, 0, 0, oc.v_circular(x0), 0]  # 位置(x,y,z)＋速度(vx,vy,vz)
-    t0 = np.linspace(0, 10000*oc.T_circular(x0), 10000000)  # 1日分 軌道伝播
-    sol0 = runge_kutta_odeint(func, x0, t0)
+    t0 = np.linspace(0, oc.T_circular(x0), 10000000)  # 1日分 軌道伝播
+    sol0 = odeint(func, x0, t0)
     print(sol0)
     # 描画
     # plt.plot(solE[:, 0],solE[:, 1],'k')
