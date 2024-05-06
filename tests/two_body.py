@@ -1,14 +1,14 @@
 # Import Python Modules
-import numpy as np # 数値計算ライブラリ
-from scipy.integrate import odeint # 常微分方程式を解くライブラリ
-import matplotlib.pyplot as plt # 描画ライブラリ
-import orbit_calc as oc # 自作ライブラリ
+import numpy as np  # 数値計算ライブラリ
+from scipy.integrate import odeint  # 常微分方程式を解くライブラリ
+import matplotlib.pyplot as plt  # 描画ライブラリ
+import orbit_calc as oc  # 自作ライブラリ
 
-r_E = 6371 # 地球の半径, km
+r_E = 6371  # 地球の半径, km
 
 # 二体問題の運動方程式
 def func(x, t):
-    GM = 398600.4354360959 # 地球の重力定数, km3/s2
+    GM = 398600.4354360959  # 地球の重力定数, km3/s2
     r = np.linalg.norm(x[0:3])
     dxdt = [x[3],
             x[4],
@@ -20,10 +20,10 @@ def func(x, t):
 
 def draw_hohman_orbit(x1, x2, tr):
     # 微分方程式の初期条件
-    t1  = np.linspace(0, oc.T_circular(x1), 1000) # 1日分 軌道伝播
+    t1  = np.linspace(0, oc.T_circular(x1), 1000)  # 1日分 軌道伝播
     sol1 = odeint(func, x1, t1)
 
-    t2 = np.linspace(0, oc.T_circular(x2), 1000) # 1日分 軌道伝播
+    t2 = np.linspace(0, oc.T_circular(x2), 1000)  # 1日分 軌道伝播
     sol2 = odeint(func, x2, t2)
 
     ttr = np.linspace(0, oc.T_owbow(x1), 1000)
@@ -133,8 +133,6 @@ def draw_hohman_orbit2(x1, r2, dv1):
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
     plt.show()
-
-
     return dv1, dv2, soltr_combined, sol1, sol2
 
 
@@ -148,35 +146,6 @@ def ap_kick(r1, r2, dv1):
         xt = odeint(func, 1, t_step)
         sol.append(xt)
     return sol
-
-
-def rk4(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
-    y0 = np.array(y0, dtype=float)
-    y = np.zeros((len(t), len(y0)), dtype=float)
-    y[0] = y0
-    output = {'message': 'Integration successful.'}
-
-    for i in range(1, len(t)):
-        dt = t[i] - t[i - 1]
-        if hmax != 0.0 and dt > hmax:
-            dt = hmax
-
-        k1 = np.array(func(y[i - 1], t[i - 1], *args))
-        k2 = np.array(func(y[i - 1] + 0.5 * dt * k1, t[i - 1] + 0.5 * dt, *args))
-        k3 = np.array(func(y[i - 1] + 0.5 * dt * k2, t[i - 1] + 0.5 * dt, *args))
-        k4 = np.array(func(y[i - 1] + dt * k3, t[i - 1] + dt, *args))
-
-        y[i] = y[i - 1] + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-
-        # Error check based on tolerance settings
-        error_estimate = np.max(np.abs(dt / 6 * (k1 + 2*k2 + 2*k3 + k4)))
-        if error_estimate > atol + rtol * np.max(np.abs(y[i])):
-            output['message'] = 'Integration step failed due to error tolerance.'
-
-    if full_output:
-        return y, output
-    else:
-        return y
 
 
 if __name__ == '__main__':
