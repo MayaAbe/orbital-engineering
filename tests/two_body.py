@@ -18,6 +18,19 @@ def func(x, t):
             -GM*x[2]/(r**3)]
     return dxdt
 
+
+# 二体問題の運動方程式
+def funcMoon(x, t):
+    GM = 4904.058  # 月の重力定数, km3/s2
+    r = np.linalg.norm(x[0:3])
+    dxdt = [x[3],
+            x[4],
+            x[5],
+            -GM*x[0]/(r**3),
+            -GM*x[1]/(r**3),
+            -GM*x[2]/(r**3)]
+    return dxdt
+
 def draw_hohman_orbit(x1, x2, tr):
     # 微分方程式の初期条件
     t1  = np.linspace(0, oc.T_circular(x1), 1000)  # 1日分 軌道伝播
