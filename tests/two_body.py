@@ -31,6 +31,21 @@ def funcMoon(x, t):
             -GM*x[2]/(r**3)]
     return dxdt
 
+def funcTri(x, y, t):
+    GM = 398600.4354360959  # 地球の重力定数, km3/s2
+    GMm = 4904.058  # 月の重力定数, km3/s2
+    r = np.linalg.norm(x[0:3])
+    r_m = np.linalg.norm(y[0:3])
+    z = [x[0]-y[0], x[1]-y[1], x[2]-y[2]]
+    r_z = np.linalg.norm(z)
+    dxdt = [x[3],
+            x[4],
+            x[5],
+            -GM*x[0]/(r**3) - (GMm*z[0]/(r_z**3) + GMm*y[0]/(r_m**3)),
+            -GM*x[1]/(r**3) - (GMm*z[1]/(r_z**3) + GMm*y[1]/(r_m**3)),
+            -GM*x[2]/(r**3) - (GMm*z[2]/(r_z**3) + GMm*y[2]/(r_m**3))]
+    return dxdt
+
 def draw_hohman_orbit(x1, x2, tr):
     # 微分方程式の初期条件
     t1  = np.linspace(0, oc.T_circular(x1), 1000)  # 1日分 軌道伝播
