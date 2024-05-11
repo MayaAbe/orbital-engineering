@@ -39,6 +39,11 @@ def T_owbow2(r1, r2):
     r = (r1 + r2) / 2 # 楕円の半長軸を求める
     return 2 * math.pi * np.sqrt(r**3 / GM)
 
+def energy(x):
+    r = np.linalg.norm(x[0:3])
+    v = np.linalg.norm(x[3:6])
+    return v**2 / 2 - GM / r
+
 # 2インパルスホーマン移行において，遷移開始高度と軌道半径の差分をインプットとしたとき，終端位置の座標を返す関数
 def hohmann_pos(r1, dr):
     # r1 = np.linalg.norm(x1[0:3])  # 遷移開始位置の軌道半径
