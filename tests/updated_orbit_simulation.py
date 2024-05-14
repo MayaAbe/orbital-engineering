@@ -52,8 +52,8 @@ Tx = oc.T_circular(x1)  # 公転周期
 Ty = oc.T_circular(y1)  # 公転周期
 print(Tx)
 print(Ty)
-t0 = np.linspace(0, 1000*Tx, 100000)
-t1 = np.linspace(0, 100*Ty, 10000)
+t0 = np.linspace(0, 100*Tx, 10000)
+t1 = np.linspace(0, 1000*Ty, 10000)
 
 soly = odeint(funcMoon, y1, t1)
 
@@ -67,7 +67,7 @@ print(solx)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.plot(solx[:, 0], solx[:, 1], solx[:, 2], 'b')
+#ax.plot(solx[:, 0], solx[:, 1], solx[:, 2], 'b')
 ax.plot(soly[:, 0], soly[:, 1], soly[:, 2], 'r')
 plt.grid()  # 格子をつける
 plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
