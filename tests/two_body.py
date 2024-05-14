@@ -1,6 +1,7 @@
 # Import Python Modules
 import numpy as np  # 数値計算ライブラリ
 from scipy.integrate import odeint  # 常微分方程式を解くライブラリ
+from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt  # 描画ライブラリ
 import orbit_calc as oc  # 自作ライブラリ
 
@@ -21,7 +22,7 @@ def func(x, t):
 
 # 二体問題の運動方程式
 def funcMoon(x, t):
-    GM = 4904.058  # 月の重力定数, km3/s2
+    GM = 403493.253  # 月の重力定数, km3/s2
     r = np.linalg.norm(x[0:3])
     dxdt = [x[3],
             x[4],
@@ -31,7 +32,8 @@ def funcMoon(x, t):
             -GM*x[2]/(r**3)]
     return dxdt
 
-def funcTri(x, y, t):
+def funcTri(x, t, y_interpolated):
+    y = y_interpolated(t)
     GM = 398600.4354360959  # 地球の重力定数, km3/s2
     GMm = 4904.058  # 月の重力定数, km3/s2
     r = np.linalg.norm(x[0:3])
@@ -45,6 +47,23 @@ def funcTri(x, y, t):
             -GM*x[1]/(r**3) - (GMm*z[1]/(r_z**3) + GMm*y[1]/(r_m**3)),
             -GM*x[2]/(r**3) - (GMm*z[2]/(r_z**3) + GMm*y[2]/(r_m**3))]
     return dxdt
+
+def MoonEarthSat(x: tuple, y: tuple, n: int, step: int):
+    Tx = oc.T_circular(x)  # 地球公転周期
+    Ty = oc.T_circular(y)  # 月公転周期
+
+    # m*Ty > n*Tx となる最小のmを探す
+    m = 1
+    while m*Ty < n*Tx:
+        m += 1
+    print(m)
+    tx = np.linspace(0, n*Tx, int(n*Tx/step))  # 地球公転周期分
+    ty = np.linspace(0, m*Ty, int(m*Ty/step))  # 月公転周期分
+
+    soly = odeint(funcMoon, y, ty)
+    y_interpolated = interp1d(ty, soly, axis=0, kind='cubic', fill_value="extrapolate")
+    solx = odeint(lambda x, t: funcTri(x, t, y_interpolated), x, tx)
+    return solx, soly
 
 def draw_hohman_orbit(x1, x2, tr):
     # 微分方程式の初期条件
