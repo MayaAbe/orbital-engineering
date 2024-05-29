@@ -2,12 +2,14 @@ import numpy as np
 from scipy.integrate import odeint
 
 
+# LSODA法による数値積分
 def odeint(func, y0, t, args=(), rtol=1e-6, atol=1e-12, full_output=False):
     y0 = np.array(y0, dtype=float)
     y = odeint(func, y0, t, args=args, rtol=rtol, atol=atol, full_output=full_output)
     return y
 
 
+# 4段4次のルンゲクッタ法による数値積分
 def rk4(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
     y0 = np.array(y0, dtype=float)
     y = np.zeros((len(t), len(y0)), dtype=float)
@@ -37,6 +39,7 @@ def rk4(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False
         return y
 
 
+# 8段7次のルンゲクッタ法による数値積分
 def rk7(func, y0, t, args=(), rtol=1e-6, atol=1e-12, hmax=0.0, full_output=False):
     y0 = np.array(y0, dtype=float)
     y = np.zeros((len(t), len(y0)), dtype=float)
