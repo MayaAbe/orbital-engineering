@@ -11,7 +11,7 @@ x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 def grid_search(
     x1, r_aim,  # 初期ベクトルと目標半径(スカラー)
     dv1_x=(-0.1, 0.1),  # dv1のx成分の探索範囲
-    dv1_y=(2.2, 2.5),  # dv1のy成分の探索範囲
+    dv1_y=(2.3, 2.5),  # dv1のy成分の探索範囲
     increments=(0.1, 0.1)
 ):
     min_dv = float('inf')
@@ -57,20 +57,20 @@ def grid_search(
 start_time = time.time()
 best_params, best_initials = grid_search(x1, R + 35786)
 end_time = time.time()
-
-print(f'Best parameters: {best_params}')
-dv1_ans, dv2_ans, sol_com, sol1, sol2 = best_params
-print(f'best_dv1_initials: {best_initials}')
-dv = np.linalg.norm(dv1_ans) + np.linalg.norm(dv2_ans)
-print(f'Best dv: {dv}')
-
 print(f'Time elapsed: {end_time - start_time} seconds')
 
-
-# 描画
-plt.plot(sol_com[:, 0], sol_com[:, 1], 'k')
-plt.plot(sol1[:, 0], sol1[:, 1], 'b')
-plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
-plt.grid()  # 格子をつける
-plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
-plt.show()
+if best_params is not None:
+    print(f'Best parameters: {best_params}')
+    dv1_ans, dv2_ans, sol_com, sol1, sol2 = best_params
+    print(f'best_dv1_initials: {best_initials}')
+    dv = np.linalg.norm(dv1_ans) + np.linalg.norm(dv2_ans)
+    print(f'Best dv: {dv}')
+    # 描画
+    plt.plot(sol_com[:, 0], sol_com[:, 1], 'k')
+    plt.plot(sol1[:, 0], sol1[:, 1], 'b')
+    plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
+    plt.grid()  # 格子をつける
+    plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
+    plt.show()
+else:
+    print("No valid parameters found.")
