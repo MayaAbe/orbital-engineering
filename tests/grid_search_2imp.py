@@ -2,6 +2,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import two_body as tb
+import orbit_calc as oc
 # 長さの単位はkm, 時間の単位はs
 
 R = 6378.137 # Earth radius
@@ -10,9 +11,9 @@ x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 
 def grid_search(
     x1, r_aim,  # 初期ベクトルと目標半径(スカラー)
-    dv1_x=(-0.1, 0.1),  # dv1のx成分の探索範囲
-    dv1_y=(2.3, 2.5),  # dv1のy成分の探索範囲
-    increments=(0.1, 0.1)
+    dv1_x=(-0.04, 0.02),  # dv1のx成分の探索範囲
+    dv1_y=(2.8, 3.5),  # dv1のy成分の探索範囲
+    increments=(0.01, 0.01)
 ):
     min_dv = float('inf')
     best_params = None
@@ -31,7 +32,7 @@ def grid_search(
             dv1 = [dv1_x_value, dv1_y_value, 0]
 
             # dv1を
-            dv1_ans, dv2_ans, sol_com, sol1, sol2 = tb.draw_hohman_orbit2(x1, r_aim, dv1)
+            dv1_ans, dv2_ans, sol_com, sol1, sol2 = tb.hohman_orbit2(x1, r_aim, dv1)
             abs_dv1 = np.linalg.norm(dv1_ans)
             abs_dv2 = np.linalg.norm(dv2_ans)
             dv = abs_dv1 + abs_dv2
@@ -55,7 +56,7 @@ def grid_search(
 
 
 start_time = time.time()
-best_params, best_initials = grid_search(x1, R + 35786)
+best_params, best_initials = grid_search(x1, R + 384400)
 end_time = time.time()
 print(f'Time elapsed: {end_time - start_time} seconds')
 
@@ -71,6 +72,16 @@ if best_params is not None:
     plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
     plt.grid()  # 格子をつける
     plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
+    plt.show()
+
+    # エネルギーの時間変化を描画
+    energy = np.array([oc.energy(sol_com[i]) for i in range(len(sol_com))])
+    plt.figure()
+    plt.plot(energy)
+    plt.xlabel('Time')
+    plt.ylabel('Energy')
+    plt.title('Energy Variation')
+    plt.grid()
     plt.show()
 else:
     print("No valid parameters found.")
