@@ -1,8 +1,8 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import two_body as tb
-import orbit_calc as oc
+import core.two_body as tb
+import core.orbit_calc as oc
 # 長さの単位はkm, 時間の単位はs
 
 R = 6378.137 # Earth radius

@@ -4,7 +4,7 @@ from scipy.integrate import odeint, ode  # 常微分方程式を解くライブ�
 from scipy.interpolate import interp1d
 import time
 import matplotlib.pyplot as plt  # 描画ライブラリ
-import orbit_calc as oc  # 自作ライブラリ
+import core.orbit_calc as oc  # 自作ライブラリ
 
 r_E = 6371  # 地球の半径, km
 

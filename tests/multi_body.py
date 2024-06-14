@@ -2,14 +2,14 @@
 import numpy as np  # 数値計算ライブラリ
 #from scipy.integrate import odeint  # 常微分方程式を解くライブラリ
 #import matplotlib.pyplot as plt  # 描画ライブラリ
-import orbit_calc as oc  # 自作ライブラリ
+import core.orbit_calc as oc  # 自作ライブラリ
 
 
 def MultiBody(x, y, n):
     T_E = oc.T_circular(x)  # 地球周回衛星の軌道周期
     T_M = oc.T_circular(y)  # 月の軌道周期
 
-    
+
     t0 = np.linspace(0, Tx, 1000)
 
 

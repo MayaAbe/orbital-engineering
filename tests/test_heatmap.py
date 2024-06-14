@@ -1,8 +1,8 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import two_body as tb
-import orbit_calc as oc
+import core.two_body as tb
+import core.orbit_calc as oc
 
 # 初期ベクトルと定数の設定
 R = 6378.137  # Earth radius
