@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 # x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 # x1 = [384400+5000, 0, 0, 0, 1.022+0.85/1.414, 0.85+0.2]  # naname
-x1 = [384400+3000, 0, 0, 0, 1.022+1.02/1.414, 1.02/1.414]  # 3000km
+# x1 = [384400+3000, 0, 0, 0, 1.022+1.02/1.414, 1.02/1.414]  # 3000km
+x1 = [384400+3000, 0, 0, 0.87, 1.022+1.02-2.67, 0]  # 3000km
 y1 = [384400, 0, 0, 0, 1.022, 0]
 
 
@@ -13,7 +14,7 @@ y1 = [384400, 0, 0, 0, 1.022, 0]
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-solx, soly = tb.MoonEarthSat(x1, y1, 1, 100)
+solx, soly = tb.MoonEarthSat(x1, y1, 10, 100)
 # fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(solx[:, 0], solx[:, 1], solx[:, 2], 'b')

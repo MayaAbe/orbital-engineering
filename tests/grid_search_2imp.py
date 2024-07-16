@@ -11,8 +11,8 @@ x1 = [R+200, 0, 0, 0, 7.784261686425335, 0]
 
 def grid_search(
     x1, r_aim,  # 初期ベクトルと目標半径(スカラー)
-    dv1_x=(0, 0.1),  # dv1のx成分の探索範囲
-    dv1_y=(2.3, 2.6),  # dv1のy成分の探索範囲
+    dv1_x=(0, 0.01),  # dv1のx成分の探索範囲
+    dv1_y=(2.3, 4.6),  # dv1のy成分の探索範囲
     increments=(0.01, 0.01)
 ):
     min_dv = float('inf')
@@ -32,7 +32,7 @@ def grid_search(
             dv1 = [dv1_x_value, dv1_y_value, 0]
 
             # dv1を
-            dv1_ans, dv2_ans, sol_com, sol1, sol2 = tb.effective_hohman_orbit2(x1, r_aim, dv1)
+            dv1_ans, dv2_ans, sol_com, sol1, sol2 = tb.hohman_orbit2(x1, r_aim, dv1)
             abs_dv1 = np.linalg.norm(dv1_ans)
             abs_dv2 = np.linalg.norm(dv2_ans)
             dv = abs_dv1 + abs_dv2
@@ -56,7 +56,7 @@ def grid_search(
 
 
 start_time = time.time()
-best_params, best_initials = grid_search(x1, R + 35786)
+best_params, best_initials = grid_search(x1, 384400)
 end_time = time.time()
 print(f'Time elapsed: {end_time - start_time} seconds')
 
