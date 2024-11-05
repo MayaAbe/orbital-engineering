@@ -78,7 +78,7 @@ def MoonEarthSat(x: tuple, y: tuple, n: int, step: int):
     Tx = oc.T_circular(x)  # 衛星の地球公転周期
     Ty = 2360591.744  # 月公転周期
 
-    print(f"Tx: {Tx}, Ty: {Ty}")
+    # print(f"Tx: {Tx}, Ty: {Ty}")
     # m*Ty > n*Tx となる最小のmを探す
     m = int(np.ceil(n*Tx / Ty))
     tx = np.linspace(0, n*Tx, int(n*Tx/step))  # 地球公転周期分
@@ -307,11 +307,15 @@ def draw_hohman_orbit2(x1, r2, dv1):
     return dv1, dv2, soltr_combined, sol1, sol2
 
 
-def hohman_orbit3(x1, y1,  r2, dv1):
+def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
     # 与えられた円軌道を2体問題で軌道伝播
     t1 = np.linspace(0, oc.T_circular(x1), 1000)
     x1_r = [x1[0], x1[1], x1[2], -x1[3], -x1[4], -x1[5]]
-    sol1, o = MoonEarthSat(x1, y1, 0.1, 100)
+    y1_r = [y1[0], y1[1], y1[2], -y1[3], -y1[4], -y1[5]]
+    sol1, o = MoonEarthSat(x1_r, y1_r, 0.1, 100)
+    if moon_orbit_switch:
+        sol1 = o
+        sol1[:, 1] *= -1
     # 2体問題で目標軌道を書く
     r_x2 = [r2, 0, 0]
     x2 = [r2, 0, 0, 0, oc.v_circular(r_x2), 0]
@@ -331,7 +335,7 @@ def hohman_orbit3(x1, y1,  r2, dv1):
         n = 2
         step = 100
     # 楕円軌道が目標軌道半径まで到達していたらそれ以降を削除
-    print(f"n=:{n}step=:{step}")
+    # print(f"n=:{n}step=:{step}")
     soltr_before_trim, a = MoonEarthSat(tr, y1, n, step)
     if np.linalg.norm(x1[0:3]) < r2:
         inout = True
@@ -369,90 +373,68 @@ def hohman_orbit3(x1, y1,  r2, dv1):
     return dv1, dv2, soltr_combined, sol1, sol2, time_cost
 
 
-def draw_hohman_orbit3(x1, y1, r2, dv1):
+def draw_hohman_orbit3(x1, y1, r2, dv1, moon_orbit_switch=False):
     start_time = time.time()
-    # 与えられた円軌道を2体問題で軌道伝播
     x1_r = [x1[0], x1[1], x1[2], -x1[3], -x1[4], -x1[5]]
     y1_r = [y1[0], y1[1], y1[2], -y1[3], -y1[4], -y1[5]]
     sol1, o = MoonEarthSat(x1_r, y1_r, 0.1, 100)
-    # 2体問題で目標軌道を書く
+    if moon_orbit_switch:
+        sol1 = o
+        sol1[:, 1] *= -1
     r_x2 = [r2, 0, 0]
     x2 = [r2, 0, 0, 0, oc.v_circular(r_x2), 0]
-    t2  = np.linspace(0, oc.T_circular(x2), 1000)  # 1日分 軌道伝播
+    t2  = np.linspace(0, oc.T_circular(x2), 1000)
     sol2 = odeint(func, x2, t2)
-    print("最初と最後の軌道を書いたよ！")
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
-
     tr = x1.copy()
-    # print(tr)
-    # 速度増分dv1を適用
     tr[3] += dv1[0]; tr[4] += dv1[1]; tr[5] += dv1[2]
-    print(tr)
-    # 遷移軌道の楕円部分dv1影響後
-    # 1.双曲線軌道に入ったらとりあえず8000秒を0.1秒ステップで書く
+
     if oc.T_owbow(tr) == np.inf:
         n = 1
-        step = 10
-    # 2.加速された周期が目標周期より小さければ
+        step = 100
     else:
         n = 2
-        step = 1
-    # 楕円軌道が目標軌道半径まで到達していたらそれ以降を削除
-    print(f"n=:{n}step=:{step}")
+        step = 100
+
     soltr_before_trim, a = MoonEarthSat(tr, y1, n, step)
-    print("...solved ode...")
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
     if np.linalg.norm(x1[0:3]) < r2:
         inout = True
     else:
         inout = False
     soltr = trim_solution(soltr_before_trim, r2, inout)
-    print("...trimed...！")
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
 
     if soltr is not None:
-        # 遷移後の軌道dv2影響後
         v_x2 = oc.v_circular(soltr[-1])
-        # dv2遷移時の速度ベクトルの角度
         theta = np.arctan2(soltr[-1][1], soltr[-1][0])
-        # dv2以降の軌道のカルテシアン要素
         tr_x2 = [soltr[-1][0], soltr[-1][1], soltr[-1][2], -v_x2*np.sin(theta), v_x2*np.cos(theta), 0]
-        #t2_adjusted = np.linspace(0, oc.T_circular(tr_x2), len(soltr))
-        # 軌道伝播時間は円軌道半周期分
         soltr2, b = MoonEarthSat(tr_x2, y1, 0.5, step)
-        #print(soltr2)
-        # dv1遷移軌道とdev2遷移軌道を連結する
-        print(f"soltr shape: {soltr.shape}")
-        print(f"soltr2 shape: {soltr2.shape}")
         soltr_combined = np.concatenate((soltr, soltr2))
         dv2 = (tr_x2[3:6] - soltr[-1][3:6]).tolist()
-        # ベクトルの差分をとってからノルムを計算する
-        # 遷移軌道末項位置における円軌道の速度ベクトル-楕円軌道の速度ベクトル
-        # 遷移にかかった時間を計算
         data_num = len(soltr)
     else:
         soltr_combined = soltr_before_trim
         dv2 = [None, None, None]
         data_num = len(soltr_before_trim)
 
-    print("...start drawing...")
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time} seconds")
-
-
     time_cost = data_num * step
 
-    plt.plot(soltr_combined[:, 0], soltr_combined[:, 1], 'k')
-    plt.plot(sol1[:, 0], sol1[:, 1], 'b')
-    plt.plot(sol2[:, 0], sol2[:, 1], 'r--')
-    plt.grid()  # 格子をつける
-    plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
+    plt.plot(soltr_combined[:, 0] , soltr_combined[:, 1], 'k', label='Transition Orbit')
+    plt.plot(sol1[:, 0] , sol1[:, 1] , 'b', label='Initial Orbit')
+    plt.plot(sol2[:, 0] , sol2[:, 1] , 'r--', label='Target Orbit')
+    plt.grid()
+    plt.gca().set_aspect('equal')
+
+    plt.xlabel('X (km) ')
+    plt.ylabel('Y (km) ')
+    plt.legend()
+
+    # 軸のラベルを指数表記に設定
+    plt.gca().ticklabel_format(axis='x', style='sci', scilimits=(6, 6))
+    plt.gca().ticklabel_format(axis='y', style='sci', scilimits=(6, 6))
+    plt.gca().xaxis.major.formatter._useMathText = True
+    plt.gca().yaxis.major.formatter._useMathText = True
+
     plt.show()
     return dv1, dv2, soltr_combined, sol1, sol2, time_cost
-
 
 if __name__ == '__main__':
     # 地球の輪郭

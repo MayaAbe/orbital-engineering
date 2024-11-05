@@ -2,9 +2,9 @@ import core.two_body as tb
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import ArtistAnimation
+from matplotlib.animation import ArtistAnimation, FFMpegWriter, PillowWriter
 
-def create_orbit_animation(x1, y1, start_fraction=0.4, end_fraction=1.0, step=1000, interval=10, highlight_latest=True, speed_factor=1.0):
+def create_orbit_animation(x1, y1, start_fraction=0.4, end_fraction=1.0, step=1000, interval=10, highlight_latest=True, speed_factor=1.0, save=False, filename='orbit_animation.mp4'):
     solx, soly = tb.MoonEarthSat(x1, y1, 6, 10)
 
     # 表示するフレームの範囲を設定
@@ -54,13 +54,28 @@ def create_orbit_animation(x1, y1, start_fraction=0.4, end_fraction=1.0, step=10
 
     ani = ArtistAnimation(fig, frames, interval=interval * speed_factor, blit=True)
 
+    if save:
+        if filename.endswith('.mp4'):
+            Writer = FFMpegWriter(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+            ani.save(filename, writer=Writer)
+        elif filename.endswith('.gif'):
+            ani.save(filename, writer='pillow')
+        else:
+            raise ValueError("Unsupported file format. Please use .mp4 or .gif")
+
     plt.grid()  # 格子をつける
     plt.show()
 
 # 使用例
 R = 6371  # 地球の半径, km
-x1 = [384400+3000, 0, 0, 0.1, 1.022+1.02-2.923, 0]
-# x1 = [R + 36000, 0, 0, 0, 3.0668882673431845 / 1.114, 3.0668882673431845]
+x1 = [384400+3000, 0, 0, 0.8194999999999979, 1.022+1.02-2.6559999999999855, 0]
 y1 = [384400, 0, 0, 0, 1.022, 0]
 
-create_orbit_animation(x1, y1, start_fraction=0.0, end_fraction=0.175, step=3000, highlight_latest=True, speed_factor=1)
+# アニメーションを表示するだけの場合
+create_orbit_animation(x1, y1, start_fraction=0.0, end_fraction=0.178, step=3000, highlight_latest=True, speed_factor=3, save=False)
+
+# アニメーションをMP4形式で保存する場合
+# create_orbit_animation(x1, y1, start_fraction=0.0, end_fraction=0.178, step=3000, highlight_latest=True, speed_factor=3, save=True, filename='orbit_animation.mp4')
+
+# アニメーションをGIF形式で保存する場合
+# create_orbit_animation(x1, y1, start_fraction=0.0, end_fraction=0.178, step=3000, highlight_latest=True, speed_factor=3, save=True, filename='orbit_animation.gif')

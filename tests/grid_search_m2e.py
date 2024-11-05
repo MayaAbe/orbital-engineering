@@ -6,10 +6,8 @@ import core.orbit_calc as oc
 import csv
 # 長さの単位はkm, 時間の単位はs
 
-R = 6378.137 # Earth radius
-x1 = [384400+3000, 0, 0, 0, 1.022+1.02, 0]  # 3000km
-# dv1 = [0, 2.5 ,0]
-
+R = 6378.137  # Earth radius
+x1 = [384400 + 3000, 0, 0, 0, 1.022 + 1.02, 0]  # 3000km
 
 # 与える初期値は(1)x1, (2)r_aim
 # 変化させるのは(1)dv1のx成分, (2)dv1のy成分, (3)月の初期位置
@@ -25,8 +23,8 @@ def grid_search(
     best_initials = None
 
     total_iterations = (
-        ((dv1_x[1] - dv1_x[0]) / increments[0]+1) *
-        ((dv1_y[1] - dv1_y[0]) / increments[1]+1)
+        ((dv1_x[1] - dv1_x[0]) / increments[0] + 1) *
+        ((dv1_y[1] - dv1_y[0]) / increments[1] + 1)
     )
 
     current_iteration = 0
@@ -37,12 +35,11 @@ def grid_search(
     dv1_x_values = []
     dv1_y_values = []
 
-    for dv1_x_value in np.arange(dv1_x[0], dv1_x[1]+increments[0], increments[0]):
-        for dv1_y_value in np.arange(dv1_y[0], dv1_y[1]+increments[1], increments[1]):
+    for dv1_x_value in np.arange(dv1_x[0], dv1_x[1] + increments[0], increments[0]):
+        for dv1_y_value in np.arange(dv1_y[0], dv1_y[1] + increments[1], increments[1]):
             dv1 = [dv1_x_value, dv1_y_value, 0]
 
             dv1_ans, dv2_ans, sol_com, sol1, sol2, time_cost = tb.hohman_orbit3(x1, y1, r_aim, dv1)
-            # print(f'dv1_ans: {dv1_ans}, dv2_ans: {dv2_ans}')
             abs_dv1 = np.linalg.norm(dv1_ans)
             if dv2_ans[0] is not None:
                 abs_dv2 = np.linalg.norm(dv2_ans)
@@ -50,28 +47,23 @@ def grid_search(
                 abs_dv2 = np.inf
             dv = abs_dv1 + abs_dv2
 
-            # if dv1_x_value == 0:
             dv_values.append(dv)
             time_cost_values.append(time_cost)
             dv1_x_values.append(dv1_x_value)
             dv1_y_values.append(dv1_y_value)
 
-            # sol_comの末項で半径がr_aimkmを超えるかどうか
             if np.linalg.norm(sol_com[-1][0:3]) >= r_aim:
                 if dv < min_dv:
                     min_dv = dv
                     best_params = [dv1_ans, dv2_ans, sol_com, sol1, sol2, time_cost]
                     best_initials = [dv1_x_value, dv1_y_value, 0]
-            #else :
-                #np.linalg.norm(sol_com[-1][0:3])
 
             current_iteration += 1
             print(f'Iteration {current_iteration}/{total_iterations}')
-            print(f'Currenr dv1: {dv1_ans} dv2: {dv2_ans}')
+            print(f'Current dv1: {dv1_ans} dv2: {dv2_ans}')
             print(f'Current dv: {dv}')
 
     return best_params, best_initials, dv_values, time_cost_values, dv1_x_values, dv1_y_values
-
 
 def save_to_csv(filename, dv1_x_values, dv1_y_values, dv_values, time_cost_values):
     with open(filename, 'w', newline='') as file:
@@ -80,21 +72,23 @@ def save_to_csv(filename, dv1_x_values, dv1_y_values, dv_values, time_cost_value
         for dv1_x, dv1_y, dv, time_cost in zip(dv1_x_values, dv1_y_values, dv_values, time_cost_values):
             writer.writerow([dv1_x, dv1_y, dv, time_cost])
 
-
-if __name__ == "__main__":
+def main():
     param = [
-        (-5.0, 5.0),   # dv1のx成分の探索範囲
-        (-3.5, -2.5),  # dv1のy成分の探索範囲
-        (0.01, 0.01)]
+        (0.80, 0.90),   # dv1のx成分の探索範囲
+        (-2.7, -2.65),  # dv1のy成分の探索範囲
+        (0.0005, 0.0005)
+    ]
 
     # グリッドサーチの実行と時間の計測
     start_time = time.time()
-    best_params, best_initials, dv_values, time_cost_values, dv1_x_values, dv1_y_values = grid_search(x1, R + 35786, param[0], param[1], param[2])
+    best_params, best_initials, dv_values, time_cost_values, dv1_x_values, dv1_y_values = grid_search(
+        x1, R + 35786, param[0], param[1], param[2]
+    )
     end_time = time.time()
     print(f'Time elapsed: {end_time - start_time} seconds')
 
     # 出力結果のCSVへの保存
-    save_to_csv("grid_search_results.csv", dv1_x_values, dv1_y_values, dv_values, time_cost_values)
+    save_to_csv("grid_search_results_detail_x080_090_ym2.7_m2.65.csv", dv1_x_values, dv1_y_values, dv_values, time_cost_values)
 
     if best_params is not None:
         print(f'Best parameters: {best_params}')
@@ -133,3 +127,6 @@ if __name__ == "__main__":
 
     else:
         print("No valid parameters found.")
+
+if __name__ == "__main__":
+    main()
