@@ -74,9 +74,9 @@ def save_to_csv(filename, dv1_x_values, dv1_y_values, dv_values, time_cost_value
 
 def main():
     param = [
-        (0.80, 0.90),   # dv1のx成分の探索範囲
-        (-2.7, -2.65),  # dv1のy成分の探索範囲
-        (0.0005, 0.0005)
+        (-3.00, 3.00),   # dv1のx成分の探索範囲
+        (-3.0, -3.00),  # dv1のy成分の探索範囲
+        (0.001, 0.001)
     ]
 
     # グリッドサーチの実行と時間の計測

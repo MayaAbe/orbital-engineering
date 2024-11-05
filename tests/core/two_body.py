@@ -328,12 +328,12 @@ def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
     # 遷移軌道の楕円部分dv1影響後
     # 1.双曲線軌道に入ったら書く
     if oc.T_owbow(tr) == np.inf:
-        n = 1
+        n = 2
         step = 1000  # 双曲線軌道のステップは適宜修正
     # 2.加速された周期が目標周期より小さければ
     else:
-        n = 2
-        step = 100
+        n = 6.588
+        step = 300
     # 楕円軌道が目標軌道半径まで到達していたらそれ以降を削除
     # print(f"n=:{n}step=:{step}")
     soltr_before_trim, a = MoonEarthSat(tr, y1, n, step)
