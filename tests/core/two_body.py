@@ -307,7 +307,7 @@ def draw_hohman_orbit2(x1, r2, dv1):
     return dv1, dv2, soltr_combined, sol1, sol2
 
 
-def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
+def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False, monte_carlo=False):
     # 与えられた円軌道を2体問題で軌道伝播
     t1 = np.linspace(0, oc.T_circular(x1), 1000)
     x1_r = [x1[0], x1[1], x1[2], -x1[3], -x1[4], -x1[5]]
@@ -329,14 +329,22 @@ def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
     # 1.双曲線軌道に入ったら書く
     if oc.T_owbow(tr) == np.inf:
         n = 2
-        step = 1000  # 双曲線軌道のステップは適宜修正
+        step = 300  # 双曲線軌道のステップは適宜修正
     # 2.加速された周期が目標周期より小さければ
     else:
         n = 6.588
         step = 300
     # 楕円軌道が目標軌道半径まで到達していたらそれ以降を削除
     # print(f"n=:{n}step=:{step}")
-    soltr_before_trim, a = MoonEarthSat(tr, y1, n, step)
+    try:
+        soltr_before_trim, a = MoonEarthSat(tr, y1, n, step)
+    except:
+        dv1 = [None, None, None]
+        dv2 = [None, None, None]
+        time_cost = np.inf
+        soltr=[None]
+        soltr2=[None]
+        return dv1, dv2, time_cost, soltr, soltr2
     if np.linalg.norm(x1[0:3]) < r2:
         inout = True
     else:
@@ -352,7 +360,7 @@ def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
         tr_x2 = [soltr[-1][0], soltr[-1][1], soltr[-1][2], -v_x2*np.sin(theta), v_x2*np.cos(theta), 0]
         #t2_adjusted = np.linspace(0, oc.T_circular(tr_x2), len(soltr))
         # 軌道伝播時間は円軌道半周期分
-        soltr2, b = MoonEarthSat(tr_x2, y1, 0.5, step)
+        soltr2, b = MoonEarthSat(tr_x2, y1, 1, step)
         #print(soltr2)
         # dv1遷移軌道とdev2遷移軌道を連結する
         # print(f"soltr shape: {soltr.shape}")
@@ -370,6 +378,12 @@ def hohman_orbit3(x1, y1,  r2, dv1, moon_orbit_switch=False):
 
     time_cost = data_num * step
 
+    if monte_carlo:
+        return dv1, dv2, time_cost, soltr, soltr2
+        """
+        1. soltrはdv1~dv2までの軌道
+        2. soltr2はdv2~endの軌道
+        """
     return dv1, dv2, soltr_combined, sol1, sol2, time_cost
 
 
@@ -406,7 +420,7 @@ def draw_hohman_orbit3(x1, y1, r2, dv1, moon_orbit_switch=False):
         v_x2 = oc.v_circular(soltr[-1])
         theta = np.arctan2(soltr[-1][1], soltr[-1][0])
         tr_x2 = [soltr[-1][0], soltr[-1][1], soltr[-1][2], -v_x2*np.sin(theta), v_x2*np.cos(theta), 0]
-        soltr2, b = MoonEarthSat(tr_x2, y1, 0.5, step)
+        soltr2, b = MoonEarthSat(tr_x2, y1, 1, step)
         soltr_combined = np.concatenate((soltr, soltr2))
         dv2 = (tr_x2[3:6] - soltr[-1][3:6]).tolist()
         data_num = len(soltr)
@@ -445,7 +459,7 @@ if __name__ == '__main__':
     # 微分方程式の初期条件
     x0 = [r_E+1000, 0, 0]  # 位置(x,y,z)
     x0 = [r_E+1000, 0, 0, 0, oc.v_circular(x0), 0]  # 位置(x,y,z)＋速度(vx,vy,vz)
-    t0 = np.linspace(0, oc.T_circular(x0), 10000000)  # 1日分 軌道伝播
+    t0 = np.linspace(0, oc.T_circular(x0), 86400)  # 1日分 軌道伝播
     sol0 = odeint(func, x0, t0)
     print(x0)
     # 描画
@@ -454,5 +468,5 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111, projection='3d')
     ax.plot(sol0[:, 0], sol0[:, 1], sol0[:, 2], 'b')
     plt.grid()  # 格子をつける
-    plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃える
+    plt.gca().set_aspect('equal')  # グラフのアスペクト比を揃え る
     plt.show()

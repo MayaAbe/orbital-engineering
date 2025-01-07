@@ -28,11 +28,11 @@ stable_mask = ~unstable_mask
 # 散布図の作成（ノイズが加わったデータ、unstable output、ノイズがないデータ）
 plt.figure(figsize=(6, 5))  # プロットのサイズを小さくする
 # 安定しているデータ（青）
-plt.scatter(dv1_x_results[stable_mask], dv1_y_results[stable_mask], alpha=0.4, color='b', label='Noisy Data')
+plt.scatter(dv1_x_results[stable_mask], dv1_y_results[stable_mask], alpha=0.4, color='b', label='Noisy Input(Zone a, b)')
 
 # 不安定なデータが存在する場合のみオレンジのプロットを追加
 if unstable_mask.sum() > 0:
-    plt.scatter(dv1_x_results[unstable_mask], dv1_y_results[unstable_mask], alpha=0.4, color='orange', label='Unstable Output')
+    plt.scatter(dv1_x_results[unstable_mask], dv1_y_results[unstable_mask], alpha=0.4, color='orange', label='Unstable Noisy Input(Zone c)')
 
 # ノイズがないデータ（赤）
 plt.scatter(nominal_dv1_x, nominal_dv1_y, color='r', s=100, label='Nominal Input')

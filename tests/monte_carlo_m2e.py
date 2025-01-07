@@ -97,8 +97,8 @@ def monte_carlo_simulation_with_tb(filename, n, n_samples, noise_std_x, noise_st
 if __name__ == '__main__':
     # パラメータ設定
     filename = 'gs_results.csv'  # CSVファイルのパス
-    i = 71  # nの開始値
-    j = 150  # nの終了値
+    i = 176  # nの開始値
+    j = 178  # nの終了値
     n_samples = 1000  # モンテカルロシミュレーションのサンプル数
     noise_std_x = 0.001  # dv1_xのガウスノイズの標準偏差
     noise_std_y = 0.001  # dv1_yのガウスノイズの標準偏差
